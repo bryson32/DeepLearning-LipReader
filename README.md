@@ -1,6 +1,7 @@
 # lipreaderp2
+![Demo](demovid.gif)
  
-## Lip-Reading AI: A Proof of Concept for Deaf Communication Assistance
+## Lip-Reading Computer Vision: A Proof of Concept for Deaf Communication Assistance
 Project Overview
 This project is a real-time lip-reading AI designed as a proof of concept to assist deaf and hard-of-hearing individuals in understanding spoken words by analyzing lip movements. Using computer vision and deep learning, the system captures, preprocesses, and classifies lip movements to predict spoken words without relying on audio input.
 
