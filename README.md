@@ -1,5 +1,5 @@
 # lipreaderp2
-![Demo](demovid.gif)
+![Demo](demo.gif)
  
 ## Lip-Reading Computer Vision: A Proof of Concept for Deaf Communication Assistance
 Project Overview
