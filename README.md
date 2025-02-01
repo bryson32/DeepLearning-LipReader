@@ -14,6 +14,13 @@ By leveraging a 3D Convolutional Neural Network (3D CNN), the model learns tempo
 - Advanced Preprocessing: Multi-step image processing for enhanced model accuracy.
 - Optimized Training Pipeline: Uses Adam optimization and categorical cross-entropy loss.
 
+Source Code Architecture
+
+├── collection.py          Captures lip images for a specified word using a webcam.
+├── preprocess.py          Processes and normalizes recorded frames for training.
+├── train_model.py         Builds and trains a 3D CNN on the preprocessed data.
+├── predict.py             Runs a live lip-reading demo using the trained model.
+
 ## Implementation Breakdown
 ### 1. Data Collection
 - Uses Dlib for face and landmark detection to extract the lip region.
