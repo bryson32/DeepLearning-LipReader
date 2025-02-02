@@ -4,7 +4,7 @@ import os
 import time
 
 # ==== SET THE WORD HERE ====
-WORD = "okay"  # Change this before running the script
+WORD = "panda"  # Change this before running the script
 
 # Load Dlib's face detector and shape predictor
 detector = dlib.get_frontal_face_detector()
@@ -49,11 +49,27 @@ while True:
     for face in faces:
         landmarks = predictor(gray, face)
 
-        # Extract lip region (Dlib landmarks 48-67)
+
         x_min = min([landmarks.part(i).x for i in range(48, 68)])
         x_max = max([landmarks.part(i).x for i in range(48, 68)])
         y_min = min([landmarks.part(i).y for i in range(48, 68)])
         y_max = max([landmarks.part(i).y for i in range(48, 68)])
+        
+        # Expand bounding box dynamically to avoid losing lips
+        EXPAND_RATIO = 1.3  # Adjust this value if needed
+
+        
+        lip_width = x_max - x_min
+        lip_height = y_max - y_min
+
+        # Calculate new bounding box with expansion
+        x_center = (x_min + x_max) // 2
+        y_center = (y_min + y_max) // 2
+
+        x_min = max(0, int(x_center - (lip_width // 2) * EXPAND_RATIO))
+        x_max = min(frame.shape[1], int(x_center + (lip_width // 2) * EXPAND_RATIO))
+        y_min = max(0, int(y_center - (lip_height // 2) * EXPAND_RATIO))
+        y_max = min(frame.shape[0], int(y_center + (lip_height // 2) * EXPAND_RATIO))
 
         # Draw rectangle around lips
         cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
