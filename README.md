@@ -71,3 +71,6 @@ To improve recognition accuracy, each lip sequence undergoes:
 - Mobile & Embedded Deployment: Optimize for on-device inference on smartphones or AR glasses.
 - Speaker Adaptation: Implement transfer learning for user-specific tuning.
 - This lip-reading AI is a cutting-edge proof of concept, demonstrating how deep learning and computer vision can enhance accessibility for deaf and hard-of-hearing communities.
+
+# NOTE
+- If you try to use my weights, it will SURELY not work, as my weights are trained to my lips and my lips only. The data collection method is also not incredible as it requires extreme precision when you click l -> recording. I plan on rewriting the data collection to be automated, and start at the exact moment your lips start moving, to remove this need for extreme precision.
