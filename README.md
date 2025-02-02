@@ -6,6 +6,7 @@ Project Overview
 This project is a real-time lip-reading AI designed as a proof of concept to assist deaf and hard-of-hearing individuals in understanding spoken words by analyzing lip movements. Using computer vision and deep learning, the system captures, preprocesses, and classifies lip movements to predict spoken words without relying on audio input.
 
 By leveraging a 3D Convolutional Neural Network (3D CNN), the model learns temporal and spatial patterns in lip movements, enabling real-time predictions. This project explores the intersection of AI and accessibility, demonstrating the potential of lip-reading technology for assistive communication.
+![Chart](validations.png)
 
 ## Key Features
 - Custom Lip-Reading Model: A 3D CNN trained on real-world lip movement data.
