@@ -2,7 +2,7 @@
 ![Demo](demo.gif)
  
 ## Lip-Reading Computer Vision: A Proof of Concept for Deaf Communication Assistance
-Project Overview
+Project Overview: 
 This project is a real-time lip-reading AI designed as a proof of concept to assist deaf and hard-of-hearing individuals in understanding spoken words by analyzing lip movements. Using computer vision and deep learning, the system captures, preprocesses, and classifies lip movements to predict spoken words without relying on audio input.
 
 By leveraging a 3D Convolutional Neural Network (3D CNN), the model learns temporal and spatial patterns in lip movements, enabling real-time predictions. This project explores the intersection of AI and accessibility, demonstrating the potential of lip-reading technology for assistive communication.
@@ -50,8 +50,8 @@ To improve recognition accuracy, each lip sequence undergoes:
 ### 4. Model Training
 - Dataset: Custom-recorded words with 80/20 train-validation split.
 - Loss Function: Sparse Categorical Cross-Entropy (for multi-class classification).
-- Optimizer: Adam (learning rate = 0.001) for efficient convergence.
-- Training Strategy: Batch size = 16, trained for 25 epochs.
+- Optimizer: Adam (learning rate = 0.0003) for efficient convergence.
+- Training Strategy: Batch size = 16, trained for 20 epochs.
 
 ### 5. Real-Time Prediction
 - Uses a webcam feed to detect and track lip movements.
@@ -64,13 +64,6 @@ To improve recognition accuracy, each lip sequence undergoes:
 - AI & Human Interaction: Demonstrates practical applications of deep learning in assistive technology.
 - Computer Vision & NLP Fusion: A step towards integrating lip reading with voice-to-text systems.
 - Real-World Deployment Potential: Could be extended into speech-to-text apps, smart glasses, or AR interfaces.
-
-### Future Enhancements
-- Expand Vocabulary: Train on a larger dataset covering more words and phrases.
-- Improve Model Performance: Experiment with transformer models or LSTMs for better sequence learning.
-- Mobile & Embedded Deployment: Optimize for on-device inference on smartphones or AR glasses.
-- Speaker Adaptation: Implement transfer learning for user-specific tuning.
-- This lip-reading AI is a cutting-edge proof of concept, demonstrating how deep learning and computer vision can enhance accessibility for deaf and hard-of-hearing communities.
 
 # NOTE
 - If you try to use my weights, it will SURELY not work, as my weights are trained to my lips and my lips only. The data collection method is also not incredible as it requires extreme precision when you click l -> recording. I plan on rewriting the data collection to be automated, and start at the exact moment your lips start moving, to remove this need for extreme precision.
