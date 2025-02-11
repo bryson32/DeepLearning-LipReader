@@ -1,4 +1,4 @@
-# lipreaderp2
+# Lip Reader
 ![Demo](demo.gif)
  
 ## Lip-Reading Computer Vision: A Proof of Concept for Deaf Communication Assistance
@@ -64,6 +64,17 @@ To improve recognition accuracy, each lip sequence undergoes:
 - AI & Human Interaction: Demonstrates practical applications of deep learning in assistive technology.
 - Computer Vision & NLP Fusion: A step towards integrating lip reading with voice-to-text systems.
 - Real-World Deployment Potential: Could be extended into speech-to-text apps, smart glasses, or AR interfaces.
+
+## Usage
+- **Data Collection:** Run `python collection.py`
+- **Preprocessing:** Run `python preprocess.py`
+- **Model Training:** Run `python train_model.py`
+- **Live Prediction:** Run `python predict.py`
+
+## Future Improvements
+- Automated triggering of data collection based on lip movement.
+- Improved model generalization with a diverse dataset.
+- Enhanced real-world deployment (e.g., integration with AR devices).
 
 # NOTE
 - If you try to use my weights, it will SURELY not work, as my weights are trained to my lips and my lips only. The data collection method is also not incredible as it requires extreme precision when you click l -> recording. I plan on rewriting the data collection to be automated, and start at the exact moment your lips start moving, to remove this need for extreme precision.
