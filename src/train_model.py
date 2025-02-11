@@ -82,7 +82,7 @@ model = build_3d_cnn(INPUT_SHAPE, len(words))
 
 # Compile model
 optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
-model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
+model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy", tf.keras.metrics.Precision(name="precision"), tf.keras.metrics.Recall(name="recall")])
 
 early_stopping = tf.keras.callbacks.EarlyStopping(
     monitor="val_loss", patience=5, restore_best_weights=True
@@ -106,8 +106,10 @@ model.save(MODEL_SAVE_PATH)
 print(f"\n✅ Model saved to {MODEL_SAVE_PATH}")
 
 # ==== EVALUATE MODEL ====
-test_loss, test_acc = model.evaluate(X_val, y_val_onehot)
+test_loss, test_acc, test_precision, test_recall = model.evaluate(X_val, y_val_onehot)
 print(f"\nFinal Test Accuracy: {test_acc:.4f}")
+print(f"Final Test Precision: {test_precision:.4f}")
+print(f"Final Test Recall: {test_recall:.4f}")
 
 # ==== PLOT TRAINING PERFORMANCE ====
 import matplotlib.pyplot as plt
@@ -127,4 +129,49 @@ axs[1].set_ylabel('Accuracy')
 axs[1].set_title('Training and Validation Accuracy')
 
 plt.xlabel('Epoch')
+plt.show()
+
+def compute_f1(precision, recall):
+    return 2 * (precision * recall) / (precision + recall + 1e-7)
+
+# Extract logged metrics from training history
+train_precision = history.history['precision']
+val_precision = history.history['val_precision']
+train_recall = history.history['recall']
+val_recall = history.history['val_recall']
+
+# Compute F1 scores epoch-wise
+train_f1 = [compute_f1(p, r) for p, r in zip(train_precision, train_recall)]
+val_f1 = [compute_f1(p, r) for p, r in zip(val_precision, val_recall)]
+
+epochs = range(1, EPOCHS + 1)
+
+# Create subplots for precision, recall, and F1 score
+fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+
+# Precision Plot
+axs[0].plot(epochs, train_precision, label="Train Precision")
+axs[0].plot(epochs, val_precision, label="Validation Precision")
+axs[0].set_title("Precision Over Epochs")
+axs[0].set_xlabel("Epoch")
+axs[0].set_ylabel("Precision")
+axs[0].legend()
+
+# Recall Plot
+axs[1].plot(epochs, train_recall, label="Train Recall")
+axs[1].plot(epochs, val_recall, label="Validation Recall")
+axs[1].set_title("Recall Over Epochs")
+axs[1].set_xlabel("Epoch")
+axs[1].set_ylabel("Recall")
+axs[1].legend()
+
+# F1 Score Plot
+axs[2].plot(epochs, train_f1, label="Train F1 Score")
+axs[2].plot(epochs, val_f1, label="Validation F1 Score")
+axs[2].set_title("F1 Score Over Epochs")
+axs[2].set_xlabel("Epoch")
+axs[2].set_ylabel("F1 Score")
+axs[2].legend()
+
+plt.tight_layout()
 plt.show()
