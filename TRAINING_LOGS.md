@@ -1,3 +1,9 @@
+## NOTE
+The training logs and graphs were generated using a limited dataset of 3 words (100 takes each) because the original dataset of 12 words (1200 takes) was compromised before I implemented the graph recording stage. As a result, the logs show rapid convergence across epochs, but they still demonstrate the model's capability.
+
+Planning on eventually redoing the dataset so the graphs are more robust but rerecording thousands of videos is painful :sob: 
+
+
 ```
 Epoch 1/20
 15/15 ━━━━━━━━━━━━━━━━━━━━ 28s 1s/step - accuracy: 0.3889 - loss: 1.1647 - precision: 0.4838 - recall: 0.0841 - val_accuracy: 0.8000 - val_loss: 1.0569 - val_precision: 0.0000e+00 - val_recall: 0.0000e+00
@@ -48,6 +54,3 @@ Final Test Accuracy: 1.0000
 Final Test Precision: 1.0000
 Final Test Recall: 1.0000
 ```
-
-## NOTE
-The training logs and graphs were generated using a limited dataset of 3 words (100 takes each) because the original dataset of 12 words (1200 takes) was compromised before I implemented the graph recording stage. As a result, the logs show rapid convergence across epochs, but they still demonstrate the model's capability.
