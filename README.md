@@ -7,7 +7,8 @@ This project is a real-time lip-reading AI designed as a proof of concept to ass
 
 By leveraging a 3D Convolutional Neural Network (3D CNN), the model learns temporal and spatial patterns in lip movements, enabling real-time predictions. This project explores the intersection of AI and accessibility, demonstrating the potential of lip-reading technology for assistive communication.
 
-[Training Logs & Notes](./TRAINING_LOGS.md)
+### [Training Logs & Notes](./TRAINING_LOGS.md)
+
 <img src="validations.png" alt="chart" height="600"/>
 <img src="P-R-F-Scores.png" alt="chart" height="700"/>
 
