@@ -1,7 +1,20 @@
-## NOTE
-The training logs and graphs were generated using a limited dataset of 3 words (100 takes each) because the original dataset of 12 words (1200 takes) was compromised before I implemented the graph recording stage. As a result, the logs show rapid convergence across epochs, but they still demonstrate the model's capability.
+## Note on logs
+Due to the original dataset of 12 words (1200 takes) being compromised before I implemented the graph recording stage, the training logs and graphs were generated using a limited dataset of 3 words (100 takes each). As a result, the logs show rapid convergence across epochs, but they still demonstrate the model's capability.
 
 Planning on eventually redoing the dataset so the graphs are more robust but rerecording thousands of videos is painful :sob: 
+
+## Note on Early Epoch Metrics
+
+You may notice that the validation accuracy improves before the training accuracy during the early epochs. This can occur due to:
+
+- **Dropout and Regularization:**  
+  During training, dropout (and other regularization techniques) are active, which can lower the training accuracy. In contrast, these are disabled during validation, leading to higher apparent performance.
+
+- **Small Dataset Effects:**  
+  With a limited dataset (3 words, 100 takes each), the metrics can be volatile and the validation set might be inherently easier, causing rapid improvements.
+
+- **Proof-of-Concept Nature:**  
+  This behavior is expected in a simplified setup and does not necessarily indicate a problem—it simply reflects the controlled conditions of our limited dataset.
 
 
 ```
