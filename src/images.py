@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+from pathlib import Path
 
-from config import IMAGE_SIZE
+from config import FRAME_COUNT, IMAGE_SIZE
 
 
 def crop_mouth(frame, landmarks):
@@ -32,3 +33,21 @@ def preprocess_frame(image):
     sharpened = cv2.filter2D(filtered, -1, kernel)
     result = cv2.GaussianBlur(sharpened, (3, 3), 0)
     return result.astype(np.float32) / 255.0
+
+
+def prepare_sequence(crops):
+    if len(crops) != FRAME_COUNT:
+        raise ValueError(f"Expected {FRAME_COUNT} frames, got {len(crops)}")
+    return np.stack([preprocess_frame(crop) for crop in crops])
+
+
+def load_take(path):
+    files = list(Path(path).glob("frame_*.png"))
+    try:
+        files.sort(key=lambda p: int(p.stem.removeprefix("frame_")))
+        indices = [int(p.stem.removeprefix("frame_")) for p in files]
+    except ValueError as error:
+        raise ValueError(f"Invalid frame name in {path}") from error
+    if indices != list(range(FRAME_COUNT)):
+        raise ValueError(f"{path}: expected frames 0 through {FRAME_COUNT - 1}")
+    return prepare_sequence([cv2.imread(str(file)) for file in files])
