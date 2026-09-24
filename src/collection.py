@@ -1,14 +1,16 @@
 import cv2
 import dlib
 import os
+
+from config import DATA_DIR, LANDMARKS, MODEL_DIR, PROCESSED_DIR
 import time
 
 WORD = "panda"
 
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("model/shape_predictor_68_face_landmarks.dat")
+predictor = dlib.shape_predictor(str(LANDMARKS))
 
-OUTPUT_DIR = "data/"
+OUTPUT_DIR = DATA_DIR
 FRAMES_PER_WORD = 22
 
 if not os.path.exists(OUTPUT_DIR):

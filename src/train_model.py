@@ -5,12 +5,14 @@ import time
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
+from config import MODEL_DIR, PROCESSED_DIR
+
 BATCH_SIZE = 16
 EPOCHS = 20
 LEARNING_RATE = 0.0003
 INPUT_SHAPE = (22, 80, 112, 1)
 
-PROCESSED_DATA_DIR = "processed_data/"
+PROCESSED_DATA_DIR = PROCESSED_DIR
 words = sorted(os.listdir(PROCESSED_DATA_DIR))
 word_to_index = {word: i for i, word in enumerate(words)}
 
@@ -89,9 +91,8 @@ history = model.fit(
     validation_data=(X_val, y_val_onehot),
 )
 
-MODEL_SAVE_PATH = "model/lip_reader_3dcnn.h5"
-if not os.path.exists("model"):
-    os.makedirs("model")
+MODEL_SAVE_PATH = MODEL_DIR / "lip_reader_3dcnn.h5"
+MODEL_DIR.mkdir(exist_ok=True)
 model.save(MODEL_SAVE_PATH)
 print(f"\nModel saved to {MODEL_SAVE_PATH}")
 

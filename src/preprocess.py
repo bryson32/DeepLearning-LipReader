@@ -2,8 +2,10 @@ import cv2
 import os
 import numpy as np
 
-INPUT_DIR = "data/"
-OUTPUT_DIR = "processed_data/"
+from config import DATA_DIR, PROCESSED_DIR
+
+INPUT_DIR = DATA_DIR
+OUTPUT_DIR = PROCESSED_DIR
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)

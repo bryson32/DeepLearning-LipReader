@@ -4,17 +4,19 @@ import tensorflow as tf
 import dlib
 import os
 
-MODEL_PATH = "model/lip_reader_3dcnn.h5"
+from config import DATA_DIR, LANDMARKS, MODEL_DIR, PROCESSED_DIR
+
+MODEL_PATH = MODEL_DIR / "lip_reader_3dcnn.h5"
 model = tf.keras.models.load_model(MODEL_PATH)
 print(f"\nLoaded model from {MODEL_PATH}")
 
-PROCESSED_DATA_DIR = "processed_data/"
+PROCESSED_DATA_DIR = PROCESSED_DIR
 words = sorted(os.listdir(PROCESSED_DATA_DIR))
 word_to_index = {word: i for i, word in enumerate(words)}
 index_to_word = {i: word for word, i in word_to_index.items()}
 
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("model/shape_predictor_68_face_landmarks.dat")
+predictor = dlib.shape_predictor(str(LANDMARKS))
 
 cap = cv2.VideoCapture(0)
 print("\nPress 'L' to start prediction, 'Q' to exit...")
