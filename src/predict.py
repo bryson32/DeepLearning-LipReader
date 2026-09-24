@@ -5,6 +5,7 @@ import dlib
 import os
 
 from config import DATA_DIR, LANDMARKS, MODEL_DIR, PROCESSED_DIR
+from images import preprocess_frame
 
 MODEL_PATH = MODEL_DIR / "lip_reader_3dcnn.h5"
 model = tf.keras.models.load_model(MODEL_PATH)
@@ -64,25 +65,7 @@ while True:
             lip_region = frame[y_min:y_max, x_min:x_max]
             lip_region = cv2.resize(lip_region, (112, 80))
 
-            gray_lip = cv2.cvtColor(lip_region, cv2.COLOR_BGR2GRAY)
-
-            blurred = cv2.GaussianBlur(gray_lip, (5, 5), 0)
-
-            min_pixel = np.min(blurred)
-            max_pixel = np.max(blurred)
-            contrast_stretched = (blurred - min_pixel) / (max_pixel - min_pixel + 1e-5) * 255
-            contrast_stretched = contrast_stretched.astype(np.uint8)
-
-            bilateral_filtered = cv2.bilateralFilter(contrast_stretched, 5, 75, 75)
-
-            sharpen_kernel = np.array([[-1, -1, -1],
-                                       [-1,  9, -1],
-                                       [-1, -1, -1]])
-            sharpened = cv2.filter2D(bilateral_filtered, -1, sharpen_kernel)
-
-            final_processed = cv2.GaussianBlur(sharpened, (3, 3), 0)
-
-            normalized = final_processed / 255.0
+            normalized = preprocess_frame(lip_region)
             frames.append(normalized)
 
             if recording and len(frames) == FRAME_COUNT:
