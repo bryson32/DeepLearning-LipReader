@@ -1,20 +1,20 @@
-## Note on GRAPH LOGS
-Due to the original dataset of 12 words (1200 takes) being compromised before I implemented the graph recording stage, the post graph implementation stage training logs and graphs were generated using a limited dataset of 3 words (100 takes each). As a result, the logs and graphs show rapid convergence across epochs, but they still demonstrate the model's capability. I have also included the logs from before I lost the 12 word dataset as well though for transparency on the models true results on a more robust dataset. Just no pretty graphs to display them, hence why ive provided the 3 word graphs on the front page README, since theyre all I have at the moment for graphs demonstrating performance.
+## Historical results
+These notes and graphs are from 2025. The original recordings are unavailable, and the logged split details have not been verified. They do not describe the updated pipeline.
 
-Planning on eventually redoing the dataset so the graphs are more robust but rerecording thousands of videos is painful :sob: 
+The graphs used three words with 100 takes each after the original 12-word dataset was lost. The earlier logs are kept below for reference.
 
 ## Note on Early Epoch Metrics For GRAPH LOGS
 
 You may notice that the validation accuracy improves before the training accuracy during the early epochs. This can occur due to:
 
 - **Dropout and Regularization:**  
-  During training, dropout (and other regularization techniques) are active, which can lower the training accuracy. In contrast, these are disabled during validation, leading to higher apparent performance.
+  Dropout is active during training and disabled during validation. Weight regularization penalties still contribute to loss.
 
 - **Small Dataset Effects:**  
   With a limited dataset (3 words, 100 takes each), the metrics can be volatile and the validation set might be inherently easier, causing rapid improvements.
 
 - **Proof-of-Concept Nature:**  
-  This behavior is expected in a simplified setup and does not necessarily indicate a problem—it simply reflects the controlled conditions of our limited dataset.
+  These curves alone do not establish performance outside the recorded dataset.
 
 # Pre Graph Logs
 ```
