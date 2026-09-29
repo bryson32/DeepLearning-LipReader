@@ -1,73 +1,60 @@
-import numpy as np
-import tensorflow as tf
-import os
-import json
-from sklearn.model_selection import train_test_split
+import argparse
+from pathlib import Path
 
-from config import MODEL_DIR, PROCESSED_DIR
+import numpy as np
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+
+from artifacts import save_run
+from config import INPUT_SHAPE, PROCESSED_DIR, RUN_DIR
+from dataset import load_dataset
 from network import build_3d_cnn
 
-BATCH_SIZE = 16
-EPOCHS = 20
-LEARNING_RATE = 0.0003
-INPUT_SHAPE = (22, 80, 112, 1)
 
-PROCESSED_DATA_DIR = PROCESSED_DIR
-words = sorted(os.listdir(PROCESSED_DATA_DIR))
-word_to_index = {word: i for i, word in enumerate(words)}
+def train(data, output, epochs=20, batch_size=16, seed=42):
+    if Path(output).exists():
+        raise ValueError(f"Run already exists: {output}. Choose a new output directory.")
+    if epochs < 1 or batch_size < 1:
+        raise ValueError("Epochs and batch size must be positive")
+    x, y, labels, hashes = load_dataset(data)
+    if len(labels) < 2 or np.bincount(y, minlength=len(labels)).min() < 5:
+        raise ValueError("Record at least five takes each for at least two words")
+    tf.keras.utils.set_random_seed(seed)
+    training, validation = train_test_split(np.arange(len(y)), test_size=0.2, stratify=y, random_state=seed)
+    model = build_3d_cnn(INPUT_SHAPE, len(labels))
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0003),
+                  loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    print(f"Training on {len(training)} clips; validating on {len(validation)} clips")
+    print(f"Model parameters: {model.count_params():,}")
+    history = model.fit(x[training], y[training], validation_data=(x[validation], y[validation]),
+                        epochs=epochs, batch_size=batch_size, verbose=2,
+                        callbacks=[tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=5,
+                                                                    restore_best_weights=True)])
+    loss, accuracy = model.evaluate(x[validation], y[validation], verbose=0)
+    metadata = {
+        "labels": labels, "seed": seed, "epochs_requested": epochs,
+        "batch_size": batch_size, "learning_rate": 0.0003, "parameters": model.count_params(),
+        "training_hashes": [hashes[i] for i in training],
+        "validation_hashes": [hashes[i] for i in validation],
+        "history": history.history, "best_epoch": int(np.argmin(history.history["val_loss"])) + 1,
+        "validation": {"loss": float(loss), "accuracy": float(accuracy)},
+    }
+    save_run(model, output, metadata)
+    print(f"Validation accuracy: {accuracy:.4f}")
+    print(f"Saved run to {output}")
+    return model, metadata
 
-X, y = [], []
 
-print("\nLoading data...")
+def main():
+    parser = argparse.ArgumentParser(description="Train a small vocabulary lip classifier.")
+    parser.add_argument("--data", type=Path, default=PROCESSED_DIR)
+    parser.add_argument("--output", type=Path, default=RUN_DIR)
+    parser.add_argument("--epochs", type=int, default=20)
+    parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--seed", type=int, default=42)
+    args = parser.parse_args()
+    train(args.data, args.output, args.epochs, args.batch_size, args.seed)
 
-for word in words:
-    word_path = os.path.join(PROCESSED_DATA_DIR, word)
 
-    for take_file in sorted(os.listdir(word_path)):
-        if take_file.endswith(".npy"):
-            filepath = os.path.join(word_path, take_file)
-            frames = np.load(filepath)
-
-            if frames.shape == (22, 80, 112):
-                frames = np.expand_dims(frames, axis=-1)
-                X.append(frames)
-                y.append(word_to_index[word])
-
-X = np.array(X)
-y = np.array(y)
-
-print(f"Loaded {len(X)} samples across {len(words)} words.")
-
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
-
-y_train_onehot = tf.keras.utils.to_categorical(y_train, num_classes=len(words))
-y_val_onehot = tf.keras.utils.to_categorical(y_val, num_classes=len(words))
-
-model = build_3d_cnn(INPUT_SHAPE, len(words))
-
-optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
-model.compile(optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
-
-early_stopping = tf.keras.callbacks.EarlyStopping(
-    monitor="val_loss", patience=5, restore_best_weights=True
-)
-
-print("\nTraining model...\n")
-
-history = model.fit(
-    X_train, y_train_onehot,
-    epochs=EPOCHS,
-    batch_size=BATCH_SIZE,
-    validation_data=(X_val, y_val_onehot),
-    callbacks=[early_stopping],
-    verbose=2,
-)
-
-MODEL_SAVE_PATH = MODEL_DIR / "lip_reader.keras"
-MODEL_DIR.mkdir(exist_ok=True)
-model.save(MODEL_SAVE_PATH)
-print(f"\nModel saved to {MODEL_SAVE_PATH}")
-
-val_loss, val_acc = model.evaluate(X_val, y_val_onehot, verbose=0)
-print(f"Validation accuracy: {val_acc:.4f}")
-(MODEL_DIR / "history.json").write_text(json.dumps(history.history, indent=2) + "\n")
+if __name__ == "__main__":
+    main()
