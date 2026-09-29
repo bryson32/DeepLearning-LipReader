@@ -1,105 +1,47 @@
-import cv2
+import argparse
+import json
+from pathlib import Path
+from time import perf_counter
+
 import numpy as np
-import tensorflow as tf
-import dlib
-import os
 
-from config import DATA_DIR, LANDMARKS, MODEL_DIR, PROCESSED_DIR
-from images import preprocess_frame
+from artifacts import load_run
+from camera import run_camera
+from config import INPUT_SHAPE, RUN_DIR
+from images import load_take, prepare_sequence
 
-MODEL_PATH = MODEL_DIR / "lip_reader_3dcnn.h5"
-model = tf.keras.models.load_model(MODEL_PATH)
-print(f"\nLoaded model from {MODEL_PATH}")
 
-PROCESSED_DATA_DIR = PROCESSED_DIR
-words = sorted(os.listdir(PROCESSED_DATA_DIR))
-word_to_index = {word: i for i, word in enumerate(words)}
-index_to_word = {i: word for word, i in word_to_index.items()}
+def predict_sequence(model, labels, sequence):
+    sequence = np.asarray(sequence, dtype=np.float32)
+    if sequence.shape != INPUT_SHAPE[:-1] or not np.isfinite(sequence).all():
+        raise ValueError("Expected a finite 22x80x112 clip")
+    started = perf_counter()
+    probabilities = model(sequence[None, ..., None], training=False).numpy()[0]
+    elapsed = (perf_counter() - started) * 1000
+    if not np.isfinite(probabilities).all():
+        raise ValueError("Model returned non-finite scores")
+    index = int(np.argmax(probabilities))
+    return {"word": labels[index], "score": float(probabilities[index]), "inference_ms": elapsed}
 
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(str(LANDMARKS))
 
-cap = cv2.VideoCapture(0)
-print("\nPress 'L' to start prediction, 'Q' to exit...")
+def main():
+    parser = argparse.ArgumentParser(description="Classify a recorded clip or use the webcam.")
+    parser.add_argument("--run", type=Path, default=RUN_DIR)
+    parser.add_argument("--take", type=Path)
+    parser.add_argument("--camera", type=int, default=0)
+    args = parser.parse_args()
+    model, metadata = load_run(args.run)
+    labels = metadata["labels"]
+    if args.take is not None:
+        print(json.dumps(predict_sequence(model, labels, load_take(args.take)), indent=2))
+        return
 
-frames = []
-FRAME_COUNT = 22
-recording = False
-predicted_word = ""
+    def consume(frames):
+        result = predict_sequence(model, labels, prepare_sequence(frames))
+        return f"{result['word']} (score {result['score']:.2f})"
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Error: Could not read frame.")
-        break
+    run_camera(consume, args.camera)
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = detector(gray)
 
-    if len(faces) > 0:
-        for face in faces:
-            landmarks = predictor(gray, face)
-
-            x_min = min([landmarks.part(i).x for i in range(48, 68)])
-            x_max = max([landmarks.part(i).x for i in range(48, 68)])
-            y_min = min([landmarks.part(i).y for i in range(48, 68)])
-            y_max = max([landmarks.part(i).y for i in range(48, 68)])
-
-            x_min = max(0, x_min - 10)
-            x_max = min(frame.shape[1], x_max + 10)
-            y_min = max(0, y_min - 10)
-            y_max = min(frame.shape[0], y_max + 10)
-
-            box_width = x_max - x_min
-            box_height = y_max - y_min
-
-            if box_width > box_height:
-                center_y = (y_min + y_max) // 2
-                y_min = max(0, center_y - box_width // 2)
-                y_max = min(frame.shape[0], center_y + box_width // 2)
-            else:
-                center_x = (x_min + x_max) // 2
-                x_min = max(0, center_x - box_height // 2)
-                x_max = min(frame.shape[1], center_x + box_height // 2)
-
-            lip_region = frame[y_min:y_max, x_min:x_max]
-            lip_region = cv2.resize(lip_region, (112, 80))
-
-            normalized = preprocess_frame(lip_region)
-            frames.append(normalized)
-
-            if recording and len(frames) == FRAME_COUNT:
-                input_sequence = np.array(frames, dtype=np.float32)
-                input_sequence = np.expand_dims(input_sequence, axis=0)
-                input_sequence = np.expand_dims(input_sequence, axis=-1)
-
-                prediction = model.predict(input_sequence)
-                predicted_index = np.argmax(prediction)
-                predicted_word = index_to_word[predicted_index]
-
-                print(f"\nPredicted Word: {predicted_word}")
-
-                frames = []
-                recording = False
-
-    else:
-        print("No face detected, skipping frame.")
-
-    if predicted_word:
-        cv2.putText(frame, f"Predicted: {predicted_word}", (50, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
-    cv2.imshow("Lip Reader - Press 'L' to start", frame)
-
-    key = cv2.waitKey(1) & 0xFF
-
-    if key == ord('q'):
-        break
-    elif key == ord('l') and not recording:
-        print(f"\nRecording started")
-        recording = True
-        frames = []
-
-cap.release()
-cv2.destroyAllWindows()
-print("\nLive Lip Reading Stopped.")
+if __name__ == "__main__":
+    main()
